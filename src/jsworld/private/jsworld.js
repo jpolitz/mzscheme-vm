@@ -541,7 +541,8 @@
 	    breaker: function() {
 		handleError(types.schemeError(
 		    types.incompleteExn(types.exnBreak, 'user break', [])));
-	    }
+	    },
+            toplevelNode: toplevelNode
 	};
 
     }
