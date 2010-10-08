@@ -387,6 +387,21 @@ EXPORTS['js-select'] =
 	 new PrimProc('js-select', 3, false, false, jsSelect)]);
 
 
+var embed = function(worldHandler) {
+    var top = worldHandler.toplevelNode,
+        node = jsworld.MobyJsworld.div([]);
+
+    node.appendChild(top);
+
+    node.toWrittenString = function(cache) { return '(embedded world)'; };
+    node.toDisplayedString = node.toWrittenString;
+    node.toDomNode = function(cache) { return node; }
+    node.jsworldOpaque = true;
+    
+    return helpers.wrapJsValue(node);
+}
+EXPORTS['embed-world'] =
+    new PrimProc('embed-world', 1, false, false, embed);
 
 
 EXPORTS['js-big-bang'] =
