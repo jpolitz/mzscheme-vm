@@ -7,8 +7,6 @@
 
 (define b2 (async-js-big-bang
                                            
-            b1
-
             10
             
             (on-draw (lambda (w)
