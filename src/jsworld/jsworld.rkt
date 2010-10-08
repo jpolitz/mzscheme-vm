@@ -23,6 +23,7 @@
 	 js-img
 	 js-text
 	 js-select
+         embed-world
 	 js-big-bang
 	 async-js-big-bang
 
