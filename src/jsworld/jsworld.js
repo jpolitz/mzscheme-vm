@@ -682,6 +682,21 @@ EXPORTS['render-effect-effects'] =
 			return types.renderEffectEffects(effect);
 		 });
 
+EXPORTS['make-mail'] =
+    new PrimProc('make-mail',
+		 2,
+		 false, false,
+		 function(dest, msg) {
+		 	return types.mail(dest, msg);
+		 });
+
+EXPORTS['make-parcel'] =
+    new PrimProc('make-parcel',
+		 2,
+		 false, false,
+		 function(ws, mails) {
+		 	return types.parcel(ws, mails);
+		 });
 
 
 

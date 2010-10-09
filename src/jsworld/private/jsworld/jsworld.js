@@ -107,6 +107,19 @@ var jsworld = {};
     function change_world(activationRecord, updater, k) {
 	var originalWorld = activationRecord.world;
 
+        var sendMailsThenChangeWorld = function(mails) {
+            mailsArray = helpers.schemeListToArray(mails);
+            helpers.forEachK(mailsArray,
+                             // TODO: mails to self... update world first?
+                             function (mail, k2) {
+                                 var effect = new AlertEffect(mail.toString());
+                                 effect.invokeEffect(k2);
+                             },
+                             function (e) { throw e; },
+                             changeWorldHelp
+			    );
+        };
+
 	var changeWorldHelp = function() {
 		if (world instanceof WrappedWorldWithEffects) {
 			var effects = world.getEffects();
@@ -131,8 +144,13 @@ var jsworld = {};
 
 	try {
 		updater(activationRecord.world, function(newWorld) {
-				activationRecord.world = newWorld;
-				changeWorldHelp();
+				if (types.isParcel(newWorld)) {
+					activationRecord.world = newWorld.ws;
+					sendMailsThenChangeWorld(newWorld.mails);
+				} else {
+					activationRecord.world = newWorld;
+					changeWorldHelp();
+				}
 			});
 	} catch(e) {
 	    activationRecord.world = originalWorld;
