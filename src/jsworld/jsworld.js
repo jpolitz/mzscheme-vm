@@ -253,6 +253,22 @@ EXPORTS['on-msg'] =
                      }))();
                  });
 
+EXPORTS['on-server-msg'] =
+    new PrimProc('on-server-msg',
+                 1,
+                 false, false,
+                 function(onServerMsg) {
+                     check(onServerMsg, isFunction, 'on-server-msg', 'procedure');
+                     return new (WorldConfigOption.extend({
+                         init: function() {
+                             this._super("on-server-msg");
+                         },
+                         configure: function(config) {
+                             return config.updateAll({'onServerMsg': onMsg});
+                         }
+                     }))();
+                 });
+
 
 /**************************
  *** Jsworld Primitives ***
