@@ -237,6 +237,21 @@ EXPORTS['initial-effect'] =
 			     }))();
 		 });
 
+EXPORTS['on-msg'] = 
+    new PrimProc('on-msg',
+                 1,
+                 false, false,
+                 function(onMsg) {
+                     check(onMsg, isFunction, 'on-msg', 'procedure');
+                     return new (WorldConfigOption.extend({
+                         init: function() {
+                             this._super("on-msg");
+                         },
+                         configure: function(config) {
+                             return config.updateAll({'onMsg': onMsg});
+                         }
+                     }))();
+                 });
 
 
 /**************************

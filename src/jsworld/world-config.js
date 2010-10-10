@@ -53,6 +53,8 @@ var world = {};
 	    initialEffect: false,
 
 
+            onMsg: false,
+
 	    // onRedraw: world -> scene
 	    onRedraw: false,
 

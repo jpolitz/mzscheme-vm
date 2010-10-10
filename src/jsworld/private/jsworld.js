@@ -528,21 +528,33 @@
 	    toplevelNode.focus();
 	}
 	
+        if (config.lookup('onMsg')) {
+            var wrappedMsg = function(w, msg, k) {
+                caller(config.lookup('onMsg'), [w, msg], k);
+            }
+            wrappedHandlers.push(_js.on_msg(wrappedMsg));
+        }
 
+        var activationRecord = null;
 	startUserConfigs(function() {
-		_js.big_bang(toplevelNode,
-			     initWorld,
-			     wrappedHandlers,
-			     helpers.assocListToHash(attribs),
-			     terminator);
+	    activationRecord = _js.big_bang(toplevelNode,
+			                    initWorld,
+			                    wrappedHandlers,
+			                    helpers.assocListToHash(attribs),
+			                    terminator);
 	});
+
+        function getActivationRecord() {
+            return activationRecord;
+        }
 
 	return {
 	    breaker: function() {
 		handleError(types.schemeError(
 		    types.incompleteExn(types.exnBreak, 'user break', [])));
 	    },
-            toplevelNode: toplevelNode
+            toplevelNode: toplevelNode,
+            getActivationRecord: getActivationRecord
 	};
 
     }

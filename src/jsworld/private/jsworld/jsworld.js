@@ -41,6 +41,7 @@ var jsworld = {};
 	this.attribs = attribs;
 	this.worldListeners = [];
 	this.eventDetachers = [];
+        this.msgListener = doNothing;
     };
 
 
@@ -112,8 +113,11 @@ var jsworld = {};
             helpers.forEachK(mailsArray,
                              // TODO: mails to self... update world first?
                              function (mail, k2) {
-                                 var effect = new AlertEffect(mail.toString());
-                                 effect.invokeEffect(k2);
+                                 var receiver = mail.dest.getActivationRecord();
+                                 if(receiver === activationRecord) {
+                                     console.log("Warning, sending mail to self.");
+                                 }
+                                 receiver.msgListener(receiver, mail.msg, k2);
                              },
                              function (e) { throw e; },
                              changeWorldHelp
@@ -937,6 +941,39 @@ var jsworld = {};
 	};
     }
     Jsworld.on_draw = on_draw;
+
+
+    
+    function setMsgListener(activationRecord, listener) {
+        activationRecord.msgListener = listener;
+    }
+
+    // TODO: is doNothing appropriate here?  What if we lose the k?
+    function unsetMsgListener(activationRecord) {
+        activationRecord.msgListener = doNothing;
+    }
+
+    function on_msg(on_msg) {
+        return function() {
+            var msg_handler = {
+                _msg_listener: function(activationRecord, msg, k) {
+                    return change_world(activationRecord, 
+                                        function(world, k2) {
+                                            on_msg(world, msg, k2);
+                                        },
+                                        k);
+                },
+                onRegister: function (activationRecord, top) {
+                    setMsgListener(activationRecord, msg_handler._msg_listener);
+                },
+                onUnregister: function (activationRecord, top) {
+                    unsetMsgListener(activationRecord, msg_handler._msg_listener);
+                }
+            };
+            return msg_handler;
+        };
+    }
+    Jsworld.on_msg = on_msg;
 
 
 
