@@ -27,6 +27,10 @@
 	 js-big-bang
 	 async-js-big-bang
 
+         make-parcel
+         make-mail
+         on-msg
+
 	 empty-page
 	 place-on-page
 
