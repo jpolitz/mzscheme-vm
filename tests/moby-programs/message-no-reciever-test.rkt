@@ -3,14 +3,7 @@
 (require "../../src/jsworld/jsworld.rkt")
 
 
-(define w1 (async-js-big-bang
-            0
-            (on-msg (lambda (w from msg)
-                      msg))
-            (on-draw (lambda (w)
-                       (list (js-div)
-                             (list (js-text (format "The last message I got was: ~a" w))))))))
-
+(define w1 (async-js-big-bang 0 (on-tick add1 1)))
 
 (define w2 (async-js-big-bang
             5

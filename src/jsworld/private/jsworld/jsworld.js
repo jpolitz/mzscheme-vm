@@ -33,6 +33,9 @@ var jsworld = {};
 
     //////////////////////////////////////////////////////////////////////
 
+
+    var doNothingMsgListener = function(activationRecord, from, msg, k) { k(); };
+
     function BigBangRecord(top, world, handlerCreators, handlers, attribs) {    
 	this.top = top;
 	this.world = world;
@@ -41,7 +44,7 @@ var jsworld = {};
 	this.attribs = attribs;
 	this.worldListeners = [];
 	this.eventDetachers = [];
-        this.msgListener = doNothing;
+        this.msgListener = doNothingMsgListener;
     };
 
 
@@ -117,7 +120,14 @@ var jsworld = {};
                                  if(receiver === activationRecord) {
                                      console.log("Warning, sending mail to self.");
                                  }
-                                 receiver.msgListener(receiver, mail.msg, k2);
+                                 //receiver.msgListener(receiver, mail.msg, k2);
+                                 // We shouldn't invoke the msgListener immediately... this could lead to
+                                 // an endless loop.
+                                 // TODO: is this way of delaying OK?  If we do it this way, msgListener
+                                 // probably should not take a continuation argument, since it is simply
+                                 // doNothing.
+                                 setTimeout(function() { receiver.msgListener(receiver, activationRecord.iworld, mail.msg, doNothing); }, 0);
+                                 k2();
                              },
                              function (e) { throw e; },
                              changeWorldHelp
@@ -950,16 +960,16 @@ var jsworld = {};
 
     // TODO: is doNothing appropriate here?  What if we lose the k?
     function unsetMsgListener(activationRecord) {
-        activationRecord.msgListener = doNothing;
+        activationRecord.msgListener = doNothingMsgListener;
     }
 
     function on_msg(on_msg) {
         return function() {
             var msg_handler = {
-                _msg_listener: function(activationRecord, msg, k) {
+                _msg_listener: function(activationRecord, from, msg, k) {
                     return change_world(activationRecord, 
                                         function(world, k2) {
-                                            on_msg(world, msg, k2);
+                                            on_msg(world, from, msg, k2);
                                         },
                                         k);
                 },
