@@ -15,7 +15,7 @@
                            (list (make-mail world (add1 w)))))
             1)
 
-   (on-msg (lambda (w msg)
+   (on-msg (lambda (w from msg)
              (make-parcel msg
                           (list (make-mail world (add1 msg))))))))
 
