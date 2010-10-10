@@ -529,8 +529,8 @@
 	}
 	
         if (config.lookup('onMsg')) {
-            var wrappedMsg = function(w, msg, k) {
-                caller(config.lookup('onMsg'), [w, msg], k);
+            var wrappedMsg = function(w, from, msg, k) {
+                caller(config.lookup('onMsg'), [w, from, msg], k);
             }
             wrappedHandlers.push(_js.on_msg(wrappedMsg));
         }
@@ -548,7 +548,7 @@
             return activationRecord;
         }
 
-	return {
+        var iworld = {
 	    breaker: function() {
 		handleError(types.schemeError(
 		    types.incompleteExn(types.exnBreak, 'user break', [])));
@@ -556,6 +556,10 @@
             toplevelNode: toplevelNode,
             getActivationRecord: getActivationRecord
 	};
+
+        activationRecord.iworld = iworld;
+
+        return iworld;
 
     }
 
