@@ -121,43 +121,11 @@ var jsworld = {};
         }
 
         function type_to_url(name, type) {
-            if(SERVER_MSG_TYPES.hasOwnProperty(type) && type_to_url[type]) {
+            if(SERVER_MSG_TYPES.hasOwnProperty(type) && 
+               SERVER_MSG_TYPES[type]) {
                 return SERVER_MSG_TYPES[type] + "/" + name;
             }
             throw "NoSuchServerMsg: " + String(msg_type);
-        }
-
-        function wrap_sexp(sexp) {
-            if(sexp instanceof Array) {
-                var result = types.Empty;
-                for(var i = 0; i <= sexp.length; i++) {
-                    result = Cons.makeInstance(wrap_sexp(sexp[i]), result);
-                }
-                return result;
-            }
-            else if (types.isNumber(sexp) || types.isString(sexp)) {
-                return sexp;
-            }
-            else {
-                throw "Invalid S-exp.  At the moment, we only support \
-                       nested lists of numbers and strings. wrap_sexp received: " +
-                    String(sexp);
-            }
-        }
-
-        function unwrap_sexp(sexp) {
-            var arr = [];
-            if (types.isPair(sexp)) {
-                arr.push(unwrap_sexp(sexp.first()));
-                arr.concat(unwrap_sexp(sexp.rest()));
-                return arr;
-            }
-            else if (sexp.isEmpty && sexp.isEmpty()) {
-                return [];
-            }
-            else {
-                return sexp;
-            }
         }
 
         function mk_on_change(success, failure) {
@@ -177,7 +145,7 @@ var jsworld = {};
         // failure modes are, they may end up different
         function mk_success(response, type) {
             return function(response) {
-                var response_sexp = wrap_sexp(JSON.parse(response));
+                var response_sexp = helpers.wrapSexp(JSON.parse(response));
                 activationRecord.serverMsgListener(activationRecord.world,
                                                    response_sexp,
                                                    doNothing);
@@ -186,7 +154,7 @@ var jsworld = {};
         
         function mk_failure(response, type) {
             return function(response) {
-                var response_sexp = wrap_sexp(JSON.parse(response));
+                var response_sexp = helpers.wrapSexp(JSON.parse(response));
                 activationRecord.serverMsgListener(activationRecord.world,
                                                    response_sexp,
                                                    doNothing);
@@ -202,7 +170,7 @@ var jsworld = {};
         xhr.onreadystatechange = mk_on_change(success, failure);
 	xhr.open("POST", type_to_url(name, msg_type), true);
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhr.send(JSON.stringify(unwrap_sexp(msg)));
+	xhr.send(JSON.stringify(helpers.unwrapSexp(msg)));
 
     }
 
