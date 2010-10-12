@@ -45,6 +45,7 @@ var jsworld = {};
 	this.worldListeners = [];
 	this.eventDetachers = [];
         this.msgListener = doNothingMsgListener;
+        this.serverMsgListener = doNothingMsgListener;
     };
 
 
@@ -112,7 +113,9 @@ var jsworld = {};
 	var originalWorld = activationRecord.world;
 
         var sendMailsThenChangeWorld = function(mails) {
+            console.log("Sending some mails" + mails);
             mailsArray = helpers.schemeListToArray(mails);
+            console.log("Made an array." + mailsArray);
             helpers.forEachK(mailsArray,
                              // TODO: mails to self... update world first?
                              function (mail, k2) {
@@ -120,6 +123,7 @@ var jsworld = {};
                                  if(receiver === activationRecord) {
                                      console.log("Warning, sending mail to self.");
                                  }
+                                 console.log("did the self-check");
                                  //receiver.msgListener(receiver, mail.msg, k2);
                                  // We shouldn't invoke the msgListener immediately... this could lead to
                                  // an endless loop.
@@ -159,6 +163,7 @@ var jsworld = {};
 	try {
 		updater(activationRecord.world, function(newWorld) {
 				if (types.isParcel(newWorld)) {
+                                    console.log("It's a parcel!");
 					activationRecord.world = newWorld.ws;
 					sendMailsThenChangeWorld(newWorld.mails);
 				} else {
@@ -984,6 +989,37 @@ var jsworld = {};
         };
     }
     Jsworld.on_msg = on_msg;
+
+/*    function setMsgListener(activationRecord, listener) {
+        activationRecord.serverMsgListener = listener;
+    }
+
+    // TODO: is doNothing appropriate here?  What if we lose the k?
+    function unsetMsgListener(activationRecord) {
+        activationRecord.serverMsgListener = doNothing;
+    }
+
+
+    function on_server_msg(on_server_msg) {
+        return function() {
+            var msg_handler = {
+                _msg_listener: function(activationRecord, msg, k) {
+                    return change_world(activationRecord,
+                                        function(world, k2) {
+                                            on_msg(world, msg, k2);
+                                        },
+                                        k);
+                },
+                onRegister: function (activationRecord, top) {
+                    setServerMsgListener(activationRecord, msg_handler._msg_listener);
+                },
+                onUnregister: function(activationRecord, top) {
+                    unsetServerMsgListener(activationRecord, msg_handler._msg_listener);
+                }
+            };
+            return msg_handler;
+        };
+    } */
 
 
 
