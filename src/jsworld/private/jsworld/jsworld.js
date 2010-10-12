@@ -36,7 +36,8 @@ var jsworld = {};
 
     var doNothingMsgListener = function(activationRecord, from, msg, k) { k(); };
 
-    function BigBangRecord(top, world, handlerCreators, handlers, attribs) {    
+    function BigBangRecord(name, top, world, handlerCreators, handlers, attribs) {    
+        this.name = name;
 	this.top = top;
 	this.world = world;
 	this.handlers = handlers;
@@ -51,7 +52,7 @@ var jsworld = {};
 
 
     BigBangRecord.prototype.restart = function() {
-	big_bang(this.top, this.world, this.handlerCreators, this.attribs);
+	big_bang(this.name, this.top, this.world, this.handlerCreators, this.attribs);
     }
     
     BigBangRecord.prototype.pause = function() {
@@ -105,17 +106,119 @@ var jsworld = {};
 	}
     }
 
+    
 
+    function handle_server_msg(activationRecord, msg) {
+
+        if(!activationRecord.name) {
+            throw "Can't send a server message to an unnamed world";
+        }
+
+        function type_to_url(name, type) {
+            if (type === "get-client-data") {
+                return "get/" + name;
+            } else if (type === "save-client-data") {
+                return "store/" + name;
+            } else if (type === "send-effect") {
+                return "effect" + name;
+            } else {
+                throw "NoSuchServerMsg: " + String(msg_type);
+            }
+        }
+
+        function wrap_sexp(sexp) {
+            if(sexp instanceof Array) {
+                var result = types.Empty;
+                for(var i = 0; i <= sexp.length; i++) {
+                    result = Cons.makeInstance(wrap_sexp(sexp[i]), result);
+                }
+                return result;
+            }
+            else if (types.isNumber(sexp) || types.isString(sexp)) {
+                return result;
+            }
+            else {
+                throw "Invalid S-exp.  At the moment, we only support \
+                       nested lists of numbers and strings. wrap_sexp received: " +
+                    String(sexp);
+            }
+        }
+
+        function unwrap_sexp(sexp) {
+            var arr = [];
+            if (types.isPair(sexp)) {
+                arr.push(unwrap_sexp(sexp.first()));
+                arr.concat(unwrap_sexp(sexp.rest()));
+                return arr;
+            }
+            else if (sexp.isEmpty && sexp.isEmpty()) {
+                return [];
+            }
+            else {
+                return sexp;
+            }
+        }
+
+        function mk_on_change(success, failure) {
+            return function(req) {
+                if(req.readyState === 4) {
+                    if(req.status === 200) {
+                        success(req.responseText);
+                    }
+                    else {
+                        failure(req.responseText);
+                    }
+                }
+            }
+        }
+
+        // Right now these two are identical... depending on what our
+        // failure modes are, they may end up different
+        function mk_success(response, type) {
+            return function(response) {
+                var response_sexp = wrap_sexp(JSON.parse(response));
+                activationRecord.serverMsgListener(activationRecord.world,
+                                                   response_sexp,
+                                                   doNothing);
+            }
+        }
+        
+        function mk_failure(response, type) {
+            return function(response) {
+                var response_sexp = wrap_sexp(JSON.parse(response));
+                activationRecord.serverMsgListener(activationRecord.world,
+                                                   response_sexp,
+                                                   doNothing);
+            }
+        }
+
+	var xhr = new XMLHttpRequest(),
+        msg_type = msg.first(),
+        name = activationRecord.name;
+        success = mk_success(msg_type), 
+        failure = mk_failure(msg_type);
+
+        xhr.onreadystatechange = mk_on_change(success, failure);
+	xhr.open("POST", type_to_url(name, msg_type), true);
+	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhr.send(JSON.stringify(unwrap_sexp(msg)));
+
+    }
 
     // change_world: CPS( CPS(world -> world) -> void )
     // Adjust the world, and notify all listeners.
     function change_world(activationRecord, updater, k) {
 	var originalWorld = activationRecord.world;
 
+        var sendServerMsgs = function(msgs) {
+            var msgsArray = helpers.schemeListToArray(msgs);
+            msgsArray.forEach(function(msg) {
+                handle_server_msg(activationRecord, msg);
+            });
+        }
+        
         var sendMailsThenChangeWorld = function(mails) {
-            console.log("Sending some mails" + mails);
-            mailsArray = helpers.schemeListToArray(mails);
-            console.log("Made an array." + mailsArray);
+            var mailsArray = helpers.schemeListToArray(mails);
             helpers.forEachK(mailsArray,
                              // TODO: mails to self... update world first?
                              function (mail, k2) {
@@ -123,7 +226,6 @@ var jsworld = {};
                                  if(receiver === activationRecord) {
                                      console.log("Warning, sending mail to self.");
                                  }
-                                 console.log("did the self-check");
                                  //receiver.msgListener(receiver, mail.msg, k2);
                                  // We shouldn't invoke the msgListener immediately... this could lead to
                                  // an endless loop.
@@ -163,9 +265,9 @@ var jsworld = {};
 	try {
 		updater(activationRecord.world, function(newWorld) {
 				if (types.isParcel(newWorld)) {
-                                    console.log("It's a parcel!");
-					activationRecord.world = newWorld.ws;
-					sendMailsThenChangeWorld(newWorld.mails);
+				    activationRecord.world = newWorld.ws;
+                                    sendServerMsgs(newWorld.serverMsgs);
+				    sendMailsThenChangeWorld(newWorld.mails);
 				} else {
 					activationRecord.world = newWorld;
 					changeWorldHelp();
@@ -815,7 +917,7 @@ var jsworld = {};
 
     // Notes: big_bang maintains a stack of activation records; it should be possible
     // to call big_bang re-entrantly.
-    function big_bang(top, init_world, handlerCreators, attribs, k) {
+    function big_bang(name, top, init_world, handlerCreators, attribs, k) {
 
 	// Construct a fresh set of the handlers.
 	var handlers = map(handlerCreators, function(x) { return x();} );
@@ -825,7 +927,7 @@ var jsworld = {};
 
 	// Create an activation record for this big-bang.
 	var activationRecord = 
-	    new BigBangRecord(top, init_world, handlerCreators, handlers, attribs);
+	    new BigBangRecord(name, top, init_world, handlerCreators, handlers, attribs);
 
 //	runningBigBangs.push(activationRecord);
 	function keepRecordUpToDate(w, oldW, k2) {
@@ -990,15 +1092,15 @@ var jsworld = {};
     }
     Jsworld.on_msg = on_msg;
 
-/*    function setMsgListener(activationRecord, listener) {
+
+
+    function setMsgListener(activationRecord, listener) {
         activationRecord.serverMsgListener = listener;
     }
 
-    // TODO: is doNothing appropriate here?  What if we lose the k?
     function unsetMsgListener(activationRecord) {
-        activationRecord.serverMsgListener = doNothing;
+        activationRecord.serverMsgListener = doNothingMsgListener;
     }
-
 
     function on_server_msg(on_server_msg) {
         return function() {
@@ -1019,8 +1121,8 @@ var jsworld = {};
             };
             return msg_handler;
         };
-    } */
-
+    } 
+    Jsworld.on_server_msg = on_server_msg;
 
 
     function StopWhenHandler(test, receiver) {

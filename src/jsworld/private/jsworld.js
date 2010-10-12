@@ -406,7 +406,7 @@
 	var wrappedHandlers = [];
 	var wrappedRedraw;
 	var wrappedRedrawCss;
-	
+	var name = null;
 
 	if (config.lookup('onDraw')) {
 	    wrappedRedraw = function(w, k) {
@@ -535,9 +535,21 @@
             wrappedHandlers.push(_js.on_msg(wrappedMsg));
         }
 
+        if (config.lookup('onServerMsg')) {
+            var wrappedMsg = function(w, msg, k) {
+                caller(config.lookup('onServerMsg'), [w, msg], k);
+            }
+            wrappedHandlers.push(_js.on_server_msg(wrappedMsg));
+        }
+
+        if (config.lookup('name')) {
+            name = config.lookup('name');
+        }
+
         var activationRecord = null;
 	startUserConfigs(function() {
-	    activationRecord = _js.big_bang(toplevelNode,
+	    activationRecord = _js.big_bang(name,
+                                            toplevelNode,
 			                    initWorld,
 			                    wrappedHandlers,
 			                    helpers.assocListToHash(attribs),
@@ -571,10 +583,11 @@
 	shutdownUserConfigs(function() {
 		if (typeof(console) !== 'undefined' && console.log) {
 			if (e.stack) {
-				console.log(e.stack);
+                            console.log(e);
+			    console.log(e.stack);
 			}
 			else {
-				console.log(e);
+			    console.log(e);
 			}
 		}
 		if ( types.isSchemeError(e) ) {

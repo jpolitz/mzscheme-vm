@@ -237,6 +237,23 @@ EXPORTS['initial-effect'] =
 			     }))();
 		 });
 
+EXPORTS['name'] =
+    new PrimProc('name',
+                 1,
+                 false, false,
+                 function(name) {
+                     check(name, isString, 'name');
+                     return new (WorldConfigOption.extend({
+                         init: function() {
+                             this._super("name");
+                         },
+                         configure: function(config) {
+                             return config.updateAll({'name': name});
+                         }
+                     }))();
+                 });
+                    
+
 EXPORTS['on-msg'] = 
     new PrimProc('on-msg',
                  1,
