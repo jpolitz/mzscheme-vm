@@ -15,6 +15,7 @@
 (define w2 (async-js-big-bang
             5
             (on-tick (lambda (w) (make-parcel (add1 w)
+                                              '()
                                               (list (make-mail w1 (* w 10)))))
                      1)))
 

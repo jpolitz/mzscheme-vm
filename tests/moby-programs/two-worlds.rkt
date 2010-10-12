@@ -15,7 +15,9 @@
                      (lambda (w)
                        '()))
             
-            (on-tick add1 1)))
+            (on-tick add1 1)
+
+            '((name foozle))))
 
 (define b1 (async-js-big-bang
 

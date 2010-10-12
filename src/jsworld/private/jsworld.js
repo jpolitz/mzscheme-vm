@@ -548,6 +548,7 @@
             return activationRecord;
         }
 
+
         var iworld = {
 	    breaker: function() {
 		handleError(types.schemeError(
@@ -556,9 +557,9 @@
             toplevelNode: toplevelNode,
             getActivationRecord: getActivationRecord
 	};
-
+        
         activationRecord.iworld = iworld;
-
+            
         return iworld;
 
     }

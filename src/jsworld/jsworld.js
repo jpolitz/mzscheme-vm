@@ -723,10 +723,10 @@ EXPORTS['make-mail'] =
 
 EXPORTS['make-parcel'] =
     new PrimProc('make-parcel',
-		 2,
+		 3,
 		 false, false,
-		 function(ws, mails) {
-		 	return types.parcel(ws, mails);
+		 function(ws, serverMsgs, mails) {
+		     return types.parcel(ws, serverMsgs, mails);
 		 });
 
 
