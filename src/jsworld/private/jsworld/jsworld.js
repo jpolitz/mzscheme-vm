@@ -107,6 +107,12 @@ var jsworld = {};
     }
 
     
+    // hash from message strings to server message urls
+    var SERVER_MSG_TYPES = {
+        "get-client-data": "get",
+        "save-client-data": "store",
+        "send-effect": "effect"
+    }
 
     function handle_server_msg(activationRecord, msg) {
 
@@ -115,15 +121,10 @@ var jsworld = {};
         }
 
         function type_to_url(name, type) {
-            if (type === "get-client-data") {
-                return "get/" + name;
-            } else if (type === "save-client-data") {
-                return "store/" + name;
-            } else if (type === "send-effect") {
-                return "effect" + name;
-            } else {
-                throw "NoSuchServerMsg: " + String(msg_type);
+            if(SERVER_MSG_TYPES.hasOwnProperty(type) && type_to_url[type]) {
+                return SERVER_MSG_TYPES[type] + "/" + name;
             }
+            throw "NoSuchServerMsg: " + String(msg_type);
         }
 
         function wrap_sexp(sexp) {
@@ -135,7 +136,7 @@ var jsworld = {};
                 return result;
             }
             else if (types.isNumber(sexp) || types.isString(sexp)) {
-                return result;
+                return sexp;
             }
             else {
                 throw "Invalid S-exp.  At the moment, we only support \
