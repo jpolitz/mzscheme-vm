@@ -52,8 +52,12 @@ var world = {};
 	    // begins.
 	    initialEffect: false,
 
+            // Must be unique among the worlds already named
+            name: false,
 
+            // Handle messages from other worlds, and messages from the server
             onMsg: false,
+            onServerMsg: false,
 
 	    // onRedraw: world -> scene
 	    onRedraw: false,

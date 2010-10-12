@@ -1,10 +1,12 @@
 #lang s-exp "../lang/js-impl/js-impl.rkt"
 
-(require-js "private/jsworld/jsworld.js"
-	    "private/jsworld.js"
-	    "world-config.js"
-	    "world-stimuli.js"
-	    "jsworld.js")
+(require-js 
+
+ "private/jsworld/jsworld.js"
+ "private/jsworld.js"
+ "world-config.js"
+ "world-stimuli.js"
+ "jsworld.js")
 
 (require "../image/image.rkt")
 
@@ -26,6 +28,7 @@
          embed-world
 	 js-big-bang
 	 async-js-big-bang
+         name
 
          make-parcel
          make-mail
