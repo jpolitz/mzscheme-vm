@@ -1,16 +1,12 @@
 #lang s-exp "../lang/js-impl/js-impl.rkt"
 
+(require-js "private/jsworld/jsworld.js"
+	    "private/jsworld.js"
+	    "world-config.js"
+	    "world-stimuli.js"
+	    "jsworld.js")
 
-(require-js 
-
- "private/jsworld/jsworld.js"
- "private/jsworld.js"
- "world-config.js"
- "world-stimuli.js"
- "jsworld.js")
-
-(require "../world/kernel.rkt"
-	 "../image/image.rkt")
+(require "../image/image.rkt")
 
 (provide key=?
 	 on-tick on-tick!
@@ -27,14 +23,8 @@
 	 js-img
 	 js-text
 	 js-select
-         embed-world
 	 js-big-bang
 	 async-js-big-bang
-         name
-
-         make-parcel
-         make-mail
-         on-msg
 
 	 empty-page
 	 place-on-page

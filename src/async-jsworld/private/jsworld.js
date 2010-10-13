@@ -2,11 +2,6 @@
 
 (function() {
 
-    var world = {};
-    world.Kernel = STATE.invokedModules["mzscheme-vm/world/kernel"].lookup("kernel");
-
-
-
     var Jsworld = jsworld.MobyJsworld = {};
 
     // The real low-level jsworld module:
@@ -391,7 +386,7 @@
 
 
 
-	var config = new world.Kernel.config.WorldConfig();
+	var config = new world.config.WorldConfig();
 	for(var i = 0; i < handlers.length; i++) {
 	    if (isList(handlers[i])) {
 		attribs = handlers[i];
@@ -406,12 +401,12 @@
 	}
 	config = config.updateAll({'changeWorld': Jsworld.updateWorld,
 				   'shutdownWorld': Jsworld.shutdownWorld});
-	var stimuli = new world.Kernel.stimuli.StimuliHandler(config, caller, restarter);
+	var stimuli = new world.stimuli.StimuliHandler(config, caller, restarter);
 	
 	var wrappedHandlers = [];
 	var wrappedRedraw;
 	var wrappedRedrawCss;
-	var name = null;
+	
 
 	if (config.lookup('onDraw')) {
 	    wrappedRedraw = function(w, k) {
@@ -533,51 +528,21 @@
 	    toplevelNode.focus();
 	}
 	
-        if (config.lookup('onMsg')) {
-            var wrappedMsg = function(w, from, msg, k) {
-                caller(config.lookup('onMsg'), [w, from, msg], k);
-            }
-            wrappedHandlers.push(_js.on_msg(wrappedMsg));
-        }
 
-        if (config.lookup('onServerMsg')) {
-            var wrappedMsg = function(w, msg, k) {
-                caller(config.lookup('onServerMsg'), [w, msg], k);
-            }
-            wrappedHandlers.push(_js.on_server_msg(wrappedMsg));
-        }
-
-        if (config.lookup('name')) {
-            name = config.lookup('name');
-        }
-
-        var activationRecord = null;
 	startUserConfigs(function() {
-	    activationRecord = _js.big_bang(name,
-                                            toplevelNode,
-			                    initWorld,
-			                    wrappedHandlers,
-			                    helpers.assocListToHash(attribs),
-			                    terminator);
+		_js.big_bang(toplevelNode,
+			     initWorld,
+			     wrappedHandlers,
+			     helpers.assocListToHash(attribs),
+			     terminator);
 	});
 
-        function getActivationRecord() {
-            return activationRecord;
-        }
-
-
-        var iworld = {
+	return {
 	    breaker: function() {
 		handleError(types.schemeError(
 		    types.incompleteExn(types.exnBreak, 'user break', [])));
-	    },
-            toplevelNode: toplevelNode,
-            getActivationRecord: getActivationRecord
+	    }
 	};
-        
-        activationRecord.iworld = iworld;
-            
-        return iworld;
 
     }
 
@@ -585,19 +550,13 @@
 
     var handleError = function(e) {
 	world.stimuli.massShutdown();
-//	helpers.reportError(e);
-	// When something bad happens, shut down 
-	// the world computation.
-//	helpers.reportError("Shutting down jsworld computations");
-//	world.Kernel.stimuli.onShutdown(); 
 	shutdownUserConfigs(function() {
 		if (typeof(console) !== 'undefined' && console.log) {
 			if (e.stack) {
-                            console.log(e);
-			    console.log(e.stack);
+				console.log(e.stack);
 			}
 			else {
-			    console.log(e);
+				console.log(e);
 			}
 		}
 		if ( types.isSchemeError(e) ) {
