@@ -27,6 +27,6 @@
 (define open-image-url image-url)
 (provide open-image-url)
 
-;; re-export jsworld
+;; Pull in the jsworld primitives
 (require "../jsworld/jsworld.rkt")
 (provide (all-from-out "../jsworld/jsworld.rkt"))
