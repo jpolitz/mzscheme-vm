@@ -1,7 +1,5 @@
-#lang s-exp "../../src/lang/base.ss"
+#lang s-exp "../../src/lang/moby-lang.ss"
 
-
-(printf "when-unless.rkt\n")
 
 (when (= (expt 2 100)
 	 1267650600228229401496703205376)
@@ -9,4 +7,4 @@
 
 (unless (not (= (expt 2 100)
 	   1/1267650600228229401496703205376))
-  (error 'not-ok))
+  'not-ok)

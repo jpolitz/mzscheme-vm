@@ -2,7 +2,7 @@
 
 (require "double.rkt")
 
-(check-expect (double 3) 6)
+(double 3)
 
-(check-expect (double (double (double 2))) 16)
+(double (double (double 2)))
 

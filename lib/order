@@ -4,6 +4,8 @@ js-numbers.js
 jshashtable.js
 types.js
 state.js
+world/world.js
+world/jsworld.js
 primitive.js
 control.js
 loader.js

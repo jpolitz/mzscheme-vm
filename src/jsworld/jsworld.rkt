@@ -1,6 +1,5 @@
 #lang s-exp "../lang/js-impl/js-impl.rkt"
 
-
 (require-js 
 
  "private/jsworld/jsworld.js"
@@ -9,8 +8,7 @@
  "world-stimuli.js"
  "jsworld.js")
 
-(require "../world/kernel.rkt"
-	 "../image/image.rkt")
+(require "../image/image.rkt")
 
 (provide key=?
 	 on-tick on-tick!
