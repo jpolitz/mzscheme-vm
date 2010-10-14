@@ -3,19 +3,23 @@
 (require "../../src/jsworld/jsworld.rkt")
 
 
-(define p (make-parcel 0 '() '()))
+(define b1 (async-js-big-bang ""
 
-(display (format "~a~n" p))
-
-(define b1 (async-js-big-bang 0 (on-tick add1 1)))
+                              (on-msg (lambda (w from m)
+                                        m))))
+                                        
 (define b2 (async-js-big-bang 0
 
                               (name "something")
 
                               (on-tick (lambda (w)
-                                         (make-parcel (add1 w)
-                                                      (list '("get-client-data"))
-                                                      (list (make-mail b1 w))))
-                                       1)))
+                                         (make-parcel w
+                                                      '(("get-client-data"))
+                                                      '()))
+                                       1)
 
-"Last line"
+                              (on-server-msg (lambda (w m)
+                                               (make-parcel (add1 w)
+                                                            '()
+                                                            (list (make-mail b1 m)))))))
+

@@ -281,7 +281,7 @@ EXPORTS['on-server-msg'] =
                              this._super("on-server-msg");
                          },
                          configure: function(config) {
-                             return config.updateAll({'onServerMsg': onMsg});
+                             return config.updateAll({'onServerMsg': onServerMsg});
                          }
                      }))();
                  });

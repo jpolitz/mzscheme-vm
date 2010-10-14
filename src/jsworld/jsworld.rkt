@@ -33,6 +33,7 @@
          make-parcel
          make-mail
          on-msg
+         on-server-msg
 
 	 empty-page
 	 place-on-page

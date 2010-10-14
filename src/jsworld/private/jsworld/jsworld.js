@@ -123,13 +123,13 @@ var jsworld = {};
         function type_to_url(name, type) {
             if(SERVER_MSG_TYPES.hasOwnProperty(type) && 
                SERVER_MSG_TYPES[type]) {
-                return SERVER_MSG_TYPES[type] + "/" + name;
+                return "/" + SERVER_MSG_TYPES[type] + "/" + name;
             }
             throw "NoSuchServerMsg: " + String(msg_type);
         }
 
-        function mk_on_change(success, failure) {
-            return function(req) {
+        function mk_on_change(req, success, failure) {
+            return function(event) {
                 if(req.readyState === 4) {
                     if(req.status === 200) {
                         success(req.responseText);
@@ -146,7 +146,7 @@ var jsworld = {};
         function mk_success(response, type) {
             return function(response) {
                 var response_sexp = helpers.wrapSexp(JSON.parse(response));
-                activationRecord.serverMsgListener(activationRecord.world,
+                activationRecord.serverMsgListener(activationRecord,
                                                    response_sexp,
                                                    doNothing);
             }
@@ -155,7 +155,7 @@ var jsworld = {};
         function mk_failure(response, type) {
             return function(response) {
                 var response_sexp = helpers.wrapSexp(JSON.parse(response));
-                activationRecord.serverMsgListener(activationRecord.world,
+                activationRecord.serverMsgListener(activationRecord,
                                                    response_sexp,
                                                    doNothing);
             }
@@ -167,7 +167,7 @@ var jsworld = {};
         success = mk_success(msg_type), 
         failure = mk_failure(msg_type);
 
-        xhr.onreadystatechange = mk_on_change(success, failure);
+        xhr.onreadystatechange = mk_on_change(xhr, success, failure);
 	xhr.open("POST", type_to_url(name, msg_type), true);
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhr.send(JSON.stringify(helpers.unwrapSexp(msg)));
@@ -1063,11 +1063,11 @@ var jsworld = {};
 
 
 
-    function setMsgListener(activationRecord, listener) {
+    function setServerMsgListener(activationRecord, listener) {
         activationRecord.serverMsgListener = listener;
     }
 
-    function unsetMsgListener(activationRecord) {
+    function unsetServerMsgListener(activationRecord) {
         activationRecord.serverMsgListener = doNothingMsgListener;
     }
 
@@ -1077,7 +1077,7 @@ var jsworld = {};
                 _msg_listener: function(activationRecord, msg, k) {
                     return change_world(activationRecord,
                                         function(world, k2) {
-                                            on_msg(world, msg, k2);
+                                            on_server_msg(world, msg, k2);
                                         },
                                         k);
                 },
