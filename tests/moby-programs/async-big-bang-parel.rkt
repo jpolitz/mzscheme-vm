@@ -3,23 +3,41 @@
 (require "../../src/jsworld/jsworld.rkt")
 
 
-(define b1 (async-js-big-bang ""
+(define (string-world w)
+  (list (js-div)
+        (list (js-text w))))
+  
 
-                              (on-msg (lambda (w from m)
-                                        m))))
-                                        
-(define b2 (async-js-big-bang 0
+(define b1 
+  (async-js-big-bang 
 
-                              (name "something")
+   ""
 
-                              (on-tick (lambda (w)
-                                         (make-parcel w
-                                                      '(("get-client-data"))
-                                                      '()))
-                                       1)
+   (on-msg (lambda (world from msg) msg))
+   
+   (on-draw string-world)))
 
-                              (on-server-msg (lambda (w m)
-                                               (make-parcel (add1 w)
-                                                            '()
-                                                            (list (make-mail b1 m)))))))
 
+
+(define b2 
+  (async-js-big-bang 
+
+   0
+                     
+   (name "something")
+   
+   (on-tick (lambda (w)
+              (make-parcel w
+                           '(("get-client-data"))
+                                             '()))
+            1)
+   
+   (on-server-msg (lambda (w m)
+                    (make-parcel (add1 w)
+                                 '()
+                                 `(,(make-mail b1 m)))))
+   
+   (on-draw (lambda (w)
+              (list (js-div)
+                    (list (js-text (number->string w)))
+                    (list (embed-world b1)))))))
