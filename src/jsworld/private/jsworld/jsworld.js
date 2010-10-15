@@ -978,10 +978,10 @@ var jsworld = {};
 
     function on_key(press) {
 	return function() {
-	    var wrappedPress = function(e) {
-		    preventDefault(e);
-		    stopPropagation(e);
-		    // change_world(function(w, k) { press(w, e, k); }, doNothing);
+	    var wrappedPress = function(activationRecord, e) {
+		preventDefault(e);
+		stopPropagation(e);
+		change_world(activationRecord, function(w, k) { press(w, e, k); }, doNothing);
 	    };
 	    return {
 		onRegister: function(activationRecord, top) {
