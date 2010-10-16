@@ -1333,13 +1333,23 @@ var jsworld = {};
     Jsworld.div = div;
 
 
+    function getParent(node) {
+        if(node.parentNode) {
+            return node.parentNode;
+        }
+        else if(node.parentElement) {
+            return node.parentElement;
+        }
+        return null;
+    }
+
     // Search for an ancestor of node that contains an activation record accessor.
     var getActivationRecord = function(node) {
         if (node instanceof Object) {
             if (typeof(node.__getActivationRecord) === "function") {
                 return node.__getActivationRecord();
-            } else if (node.parentElement) {
-                return getActivationRecord(node.parentElement);
+            } else if (getParent(node)) {
+                return getActivationRecord(getParent(node));
             }
         }
 
