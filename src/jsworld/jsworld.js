@@ -334,7 +334,7 @@ var jsButtonBang = function(funName) {
 	return function(worldUpdateF, effectF, attribList) {
 		check(worldUpdateF, isFunction, funName, 'procedure', 1);
 		check(effectF, isFunction, funName, 'procedure', 2);
-		checkListOf(attribList, isAssocList, funName, '(listof X Y)', 3);
+		attribList && checkListOf(attribList, isAssocList, funName, '(listof X Y)', 3);
 
 		var attribs = attribList ? assocListToHash(attribList) : {};
 		var node = jsworld.MobyJsworld.buttonBang(worldUpdateF, effectF, attribs);
