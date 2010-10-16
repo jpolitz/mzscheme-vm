@@ -8,6 +8,7 @@
   (async-js-big-bang 0
                      (on-msg (lambda (w from msg)
                                (make-parcel (add1 w)
+                                            empty
                                             (list (make-mail from "reply")))))
                      (on-draw (lambda (w)
                                 (list (js-div)
@@ -22,11 +23,14 @@
                                 (let ([w (make-ws (add1 (ws-ticks w)) (ws-msgs w))])
                                   (if (= 1 (ws-ticks w))
                                      ; send a message on first tick only
-                                      (make-parcel w (list (make-mail w1 "msg")))
+                                      (make-parcel w
+                                                   empty
+                                                   (list (make-mail w1 "msg")))
                                       w)))
                               1)
                      (on-msg (lambda (w from msg)
                                (make-parcel (make-ws (ws-ticks w) (add1 (ws-msgs w)))
+                                            empty
                                             (list (make-mail from "reply")))))
                      (on-draw (lambda (w)
                                 (list (js-div)
