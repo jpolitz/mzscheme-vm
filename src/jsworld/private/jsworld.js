@@ -559,6 +559,7 @@
         function getActivationRecord() {
             return activationRecord;
         }
+        toplevelNode.__getActivationRecord = getActivationRecord;
 
 
         var iworld = {
@@ -659,11 +660,12 @@
 // FIXME: Get effects back online!
 //		caller(effectF, [world],
 //			function(effect) {
-			    caller(updateWorldF, [w],
-				function(newWorld) {
+		caller(updateWorldF, [w, evt], k);
+//			    caller(updateWorldF, [w],
+//				function(newWorld) {
 //					world.Kernel.applyEffect(effect);
-					k(newWorld);
-				});
+//					k(newWorld);
+//				});
 //			});
 	    } catch (e) {
 		if (typeof(console) !== 'undefined' && console.log && e.stack) {

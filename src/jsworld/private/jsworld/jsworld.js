@@ -34,7 +34,14 @@ var jsworld = {};
     //////////////////////////////////////////////////////////////////////
 
 
-    var doNothingMsgListener = function(activationRecord, from, msg, k) { k(); };
+    var doNothingK = function() {
+        var k = arguments[arguments.length-1];
+        if (typeof k === "function") {
+            k();
+        } else {
+            throw new Error("doNothingK expected last argument to be a continuation!");
+        }
+    }
 
     function BigBangRecord(name, top, world, handlerCreators, handlers, attribs) {    
         this.name = name;
@@ -45,8 +52,9 @@ var jsworld = {};
 	this.attribs = attribs;
 	this.worldListeners = [];
 	this.eventDetachers = [];
-        this.msgListener = doNothingMsgListener;
-        this.serverMsgListener = doNothingMsgListener;
+        this.msgListener = doNothingK;
+        this.serverMsgListener = doNothingK;
+        this.buttonClickListener = doNothingK;
     };
 
 
@@ -1036,7 +1044,7 @@ var jsworld = {};
 
     // TODO: is doNothing appropriate here?  What if we lose the k?
     function unsetMsgListener(activationRecord) {
-        activationRecord.msgListener = doNothingMsgListener;
+        activationRecord.msgListener = doNothingK;
     }
 
     function on_msg(on_msg) {
@@ -1068,7 +1076,7 @@ var jsworld = {};
     }
 
     function unsetServerMsgListener(activationRecord) {
-        activationRecord.serverMsgListener = doNothingMsgListener;
+        activationRecord.serverMsgListener = doNothingK;
     }
 
     function on_server_msg(on_server_msg) {
@@ -1324,12 +1332,34 @@ var jsworld = {};
     }
     Jsworld.div = div;
 
+
+    // Search for an ancestor of node that contains an activation record accessor.
+    var getActivationRecord = function(node) {
+        if (node instanceof Object) {
+            if (typeof(node.__getActivationRecord) === "function") {
+                return node.__getActivationRecord();
+            } else if (node.parentElement) {
+                return getActivationRecord(node.parentElement);
+            }
+        }
+
+        return null;
+    }
+    Jsworld.getActivationRecord = getActivationRecord;
+
+
     // Used To Be: (world event -> world) (hashof X Y) -> domElement
     // Now: CPS(world event -> world) (hashof X Y) -> domElement
     function button(f, attribs) {
 	var n = document.createElement('button');
-	n.onclick = function(e) {return false;};
-	//add_ev(n, 'click', f);
+	n.onclick = function(e) {
+            var activationRecord = getActivationRecord(n);
+            if (activationRecord) {
+                change_world(activationRecord,
+                             function (w, k) { f(w, e, k); },
+                             doNothing);
+            }
+        };
 	return addFocusTracking(copy_attribs(n, attribs));
     }
     Jsworld.button = button;
