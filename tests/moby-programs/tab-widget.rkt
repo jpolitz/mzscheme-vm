@@ -36,11 +36,13 @@
 
                   (list (embed-world (insert-or-invoke (tab-world-current-tab tab-world))))))))
 
+   ;; accept messages like '("change-tab" tab-name) to change to
+   ;; different tabs
    (on-msg
     (lambda (tab-world msg)
 
       (if (equal? (first msg) "change-tab")
-          (let ([maybe-new-tab (assoc (first msg) tabs)])
+          (let ([maybe-new-tab (assoc (second msg) tabs)])
             (if maybe-new-tab
                 (make-tab-world tabs (second maybe-new-tab))
                 tab-world))
