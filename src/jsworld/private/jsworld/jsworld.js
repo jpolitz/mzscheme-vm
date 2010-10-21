@@ -55,6 +55,8 @@ var jsworld = {};
         this.msgListener = doNothingK;
         this.serverMsgListener = doNothingK;
         this.buttonClickListener = doNothingK;
+        this.handling = false;
+        this.pendingHandlers = [];
     };
 
 
@@ -86,7 +88,11 @@ var jsworld = {};
 // 	    var currentRecord = runningBigBangs.pop();
 // 	    if (currentRecord) { currentRecord.pause(); }
 // 	}
-	clear_running_state(activationRecord.worldListeners, 
+        activationRecord.pause();
+
+        console.log("Got a shutdown");
+
+/*	clear_running_state(activationRecord.worldListeners, 
 			    activationRecord.eventDetachers);
 
 
@@ -97,7 +103,7 @@ var jsworld = {};
 	for (var i = 0; i < activationRecord.eventDetachers.length; i++) {
 		activationRecord.eventDetachers[i]();
 	}
-	activationRecord.eventDetachers = [];
+	activationRecord.eventDetachers = [];*/
     }
 
 
@@ -187,6 +193,12 @@ var jsworld = {};
     function change_world(activationRecord, updater, k) {
 	var originalWorld = activationRecord.world;
 
+        if(activationRecord.handling) {
+            activationRecord.pendingHandlers.push(function() { change_world(activationRecord, updater, k);});
+            return;
+        } 
+        activationRecord.handling = true;
+
         var sendServerMsgs = function(msgs) {
             var msgsArray = helpers.schemeListToArray(msgs);
             msgsArray.forEach(function(msg) {
@@ -234,9 +246,16 @@ var jsworld = {};
 	
 	var changeWorldHelp2 = function() {
 		helpers.forEachK(activationRecord.worldListeners,
-			 function(listener, k2) { listener(activationRecord.world, originalWorld, k2); },
-			 function(e) { activationRecord.world = originalWorld; throw e; },
-			 k);
+			         function(listener, k2) { listener(activationRecord.world, originalWorld, k2); },
+			         function(e) { activationRecord.world = originalWorld; throw e; },
+                                 function() {
+                                     activationRecord.handling = false;
+                                     if(activationRecord.pendingHandlers.length > 0) {
+                                         var top_pending = activationRecord.pendingHandlers.shift();
+                                         top_pending();
+                                     }
+                                     k();
+                                 });
 	};
 
 	try {
@@ -1079,13 +1098,13 @@ var jsworld = {};
         activationRecord.serverMsgListener = doNothingK;
     }
 
-    function on_server_msg(on_server_msg) {
+    function on_server_msg(wrapped_on_server_msg) {
         return function() {
             var msg_handler = {
                 _msg_listener: function(activationRecord, msg, k) {
                     return change_world(activationRecord,
                                         function(world, k2) {
-                                            on_server_msg(world, msg, k2);
+                                            wrapped_on_server_msg(world, msg, k2);
                                         },
                                         k);
                 },
