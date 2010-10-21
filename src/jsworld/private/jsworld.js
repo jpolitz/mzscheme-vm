@@ -8,80 +8,9 @@
     var _js = jsworld.Jsworld;
 
 
-    var caller;
-    var setCaller = function(c) {
-    	caller = function(op, args, k) {
-	    c(op, args, k, handleError);
-	};
-    };
-    var unsetCaller = function() {
-    	caller = function(op, args, k) {
-		throw new Error('caller not defined!');
-	};
-    };
-    unsetCaller();
-
-    // The restarted and things to set it
-    // Note that we never want to restart the same computation
-    // more than once, so we throw an error if someone tries to do that
-    var restarter;
-    var setRestarter = function(r) {
-	    var hasRestarted = false;
-	    restarter = function(v) {
-		    if (hasRestarted) {
-			    throw new Error('Cannot restart twice!');
-		    }
-		    hasRestarted = true;
-		    r(v);
-	    };
-    };
-    var unsetRestarter = function() {
-	restarter = function() {
-		throw new Error('restarter not defined!');
-	};
-    };
-    unsetRestarter();
-
-    var terminator;
-    var setTerminator = function(t) {
-	    terminator = t;
-    };
-    var unsetTerminator = function() {
-	terminator = function() {
-		throw new Error('terminator not defined!');
-	};
-    };
-    unsetTerminator();
 
 
 
-    var userConfigs = [];
-
-    var startUserConfigs = function(k) {
-	    helpers.forEachK(userConfigs,
-			     function(aConfig, k2) {
-				caller(aConfig.startup, aConfig.startupArgs,
-					function(res) {
-						aConfig.shutdownArg = res;
-						k2()
-					});
-			     },
-			     handleError,
-			     k);
-    }
-
-    var shutdownUserConfigs = function(k) {
-//	    console.log('shutting down user configs');
-	    var theConfigs = userConfigs;
-	    userConfigs = []
-	    helpers.forEachK(theConfigs,
-			     function(aConfig, k2) {
-//			     	console.log('    shutting down a config');
-			     	caller(aConfig.shutdown, [aConfig.shutdownArg], k2);
-			     },
-			     handleError,
-			     k);
-    }
 
     var expandHandler = function(handler) {
 	return types.jsValue('function', function() {
@@ -338,6 +267,79 @@
     // bigBang: world dom (listof (list string string)) (arrayof handler) -> world
     Jsworld.bigBang = function(initWorld, toplevelNode, handlers, theCaller, theRestarter, onFail) {
 
+        var caller;
+        var setCaller = function(c) {
+    	    caller = function(op, args, k) {
+	        c(op, args, k, handleError);
+	    };
+        };
+        var unsetCaller = function() {
+    	    caller = function(op, args, k) {
+		throw new Error('caller not defined!');
+	    };
+        };
+        unsetCaller();
+        
+        // The restarted and things to set it
+        // Note that we never want to restart the same computation
+        // more than once, so we throw an error if someone tries to do that
+        var restarter;
+        var setRestarter = function(r) {
+	    var hasRestarted = false;
+	    restarter = function(v) {
+		if (hasRestarted) {
+		    throw new Error('Cannot restart twice!');
+		}
+		hasRestarted = true;
+		r(v);
+	    };
+        };
+        var unsetRestarter = function() {
+	    restarter = function() {
+		throw new Error('restarter not defined!');
+	    };
+        };
+        unsetRestarter();
+        
+        var terminator;
+        var setTerminator = function(t) {
+	    terminator = t;
+        };
+        var unsetTerminator = function() {
+	    terminator = function() {
+		throw new Error('terminator not defined!');
+	    };
+        };
+        unsetTerminator();
+
+    var userConfigs = [];
+
+    var startUserConfigs = function(k) {
+	    helpers.forEachK(userConfigs,
+			     function(aConfig, k2) {
+				caller(aConfig.startup, aConfig.startupArgs,
+					function(res) {
+						aConfig.shutdownArg = res;
+						k2()
+					});
+			     },
+			     handleError,
+			     k);
+    }
+
+    var shutdownUserConfigs = function(k) {
+//	    console.log('shutting down user configs');
+	    var theConfigs = userConfigs;
+	    userConfigs = []
+	    helpers.forEachK(theConfigs,
+			     function(aConfig, k2) {
+//			     	console.log('    shutting down a config');
+			     	caller(aConfig.shutdown, [aConfig.shutdownArg], k2);
+			     },
+			     handleError,
+			     k);
+    }
+
 
 	// shutdownListeners: arrayof (-> void)
 	// We maintain a list of thunks that need to be called as soon as we come out of
@@ -515,7 +517,9 @@
 	    wrappedHandlers.push(_js.stop_when(
 			function(w, k) { 
 				caller(config.lookup('stopWhen'), [w],
-					function(res) { k(res); });
+					function(res) { 
+                                            k(res); 
+                                        });
 			}));
 	}
 	
@@ -580,6 +584,9 @@
 
 
     var handleError = function(e) {
+        if(e.val && e.val._fields) {
+            console.log(e.val._fields[0]);
+        }
 	world.stimuli.massShutdown();
 	shutdownUserConfigs(function() {
 		if (typeof(console) !== 'undefined' && console.log) {
