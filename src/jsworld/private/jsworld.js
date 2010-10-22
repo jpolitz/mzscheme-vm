@@ -553,6 +553,7 @@
         var activationRecord = null;
 	startUserConfigs(function() {
 	    activationRecord = _js.big_bang(name,
+                                            theCaller,
                                             toplevelNode,
 			                    initWorld,
 			                    wrappedHandlers,
@@ -662,12 +663,12 @@
     Jsworld.div = _js.div;
 
     Jsworld.buttonBang = function(updateWorldF, effectF, attribs) {
-	var wrappedF = function(w, evt, k) {
+	var wrappedF = function(ar, evt, k) {
 	    try {
 // FIXME: Get effects back online!
 //		caller(effectF, [world],
 //			function(effect) {
-		caller(updateWorldF, [w, evt], k);
+		ar.caller(updateWorldF, [ar.world, evt], k);
 //			    caller(updateWorldF, [w],
 //				function(newWorld) {
 //					world.Kernel.applyEffect(effect);
@@ -687,8 +688,8 @@
     
 
     Jsworld.input = function(type, updateF, attribs) {
-	    var wrappedUpdater = function(w, evt, k) {
-		    caller(updateF, [w, evt], k);
+	    var wrappedUpdater = function(ar, evt, k) {
+		    ar.caller(updateF, [ar.world, evt], k);
 	    }
 	    return _js.input(type, wrappedUpdater, attribs);
     };
@@ -719,9 +720,9 @@
     Jsworld.text = _js.text;
 
     Jsworld.select = function(options, updateF, attribs) { 
-	    var wrappedUpdater = function(w, e, k) {
+	    var wrappedUpdater = function(ar, e, k) {
 //		    console.log(e);
-		    caller(updateF, [w, e.target.value], k);
+		    ar.caller(updateF, [ar.world, e.target.value], k);
 	    }
 	    return _js.select(attribs, options, wrappedUpdater);
     };
