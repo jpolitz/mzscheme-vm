@@ -3,11 +3,11 @@
 (require "../../src/jsworld/jsworld.rkt")
 
 (require "tab-widget.rkt")
-(require "pending-widget.rkt")
+(require "counter-widget.rkt")
 
-(define t1 (lambda () (pending-widget "Tab1")))
+(define t1 (lambda () (make-counter)))
 
-(define t2 (lambda () (pending-widget "Tab2")))
+(define t2 (lambda () (make-counter)))
 
 (define tabs (list (list "tab1" t1) (list "tab2" t2)))
 
