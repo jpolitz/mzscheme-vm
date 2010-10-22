@@ -6,26 +6,17 @@
 
 ;; A list widget that listens to "filter" messages
 
-;; a f-list is a (make-f-list (hashof (string? : world?)) (listof number?))
+;; a f-list is a (make-f-list (hashof (number? : world?)) (listof number?))
 (define-struct f-list (elts to-show))
 
 (define (make-filter-list elts (to-show (hash-map elts (lambda (k v) k))))
 
-   ;; listens to messages that look like ("filter" . (listof string?))
+   ;; listens to messages that look like ("filter" . (listof number?))
    ;; and no others
-  (define (message a-f-list msg)
+  (define (message a-f-list from msg)
     (if (equal? (car msg) "filter")
         (make-f-list elts (cdr msg))
         a-f-list))
-
-  ;; all the worlds that are in the f-list
-  (define (filter-elts a-f-list)
-    (filter (lambda (x) x)
-            (hash-map (f-list-elts a-f-list)
-                      (lambda (k elt) 
-                        (if (member k (f-list-to-show a-f-list))
-                            elt
-                            #f)))))
 
   (define (draw-css a-f-list)
     `((".filter-item"
@@ -36,8 +27,9 @@
   (define (draw a-f-list)
     (let ([elts (f-list-elts a-f-list)])
       (cons (js-div)
-            (map (lambda (k) (list (js-div '(("className" "filter-item")))
-                                   (list (embed-world (hash-ref elts k))))) 
+            (map (lambda (k) 
+                   (list (js-div '(("className" "filter-item")))
+                         (list (embed-world (hash-ref elts k))))) 
                  (f-list-to-show a-f-list)))))
 
   (async-js-big-bang 
