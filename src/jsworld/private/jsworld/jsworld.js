@@ -1325,9 +1325,14 @@ var jsworld = {};
 	if (attribs)
 	    for (a in attribs) {
 		if (attribs.hasOwnProperty(a)) {
-		    if (typeof attribs[a] == 'function') {
+                    if (typeof attribs[a] == 'function') {
 			add_ev(node, a, attribs[a]);
-		    } else {
+		    } else if (types.isFunction(attribs[a])) {
+                        add_ev(node, a,
+                               function (ar, e, k) {
+                                   ar.caller(attribs[a], [ar.world, e], k);
+                               });
+                    } else {
 			node[a] = attribs[a];//eval("node."+a+"='"+attribs[a]+"'");
 		    }
 		}
