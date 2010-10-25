@@ -658,6 +658,8 @@
 //    }
 
 
+    Jsworld.a = _js.a;
+
     Jsworld.p = _js.p;
 
     Jsworld.div = _js.div;

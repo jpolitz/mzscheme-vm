@@ -1,4 +1,4 @@
-var jsworld = {};
+var sworld = {};
 
 // Stuff here is copy-and-pasted from Chris's JSWorld.  We
 // namespace-protect it, and add the Javascript <-> Moby wrapper
@@ -1344,6 +1344,11 @@ var jsworld = {};
     //
     // NODE TYPES
     //
+
+    function a(attribs) {
+	return addFocusTracking(copy_attribs(document.createElement('a'), attribs));
+    }
+    Jsworld.a = a;
 
     function p(attribs) {
 	return addFocusTracking(copy_attribs(document.createElement('p'), attribs));

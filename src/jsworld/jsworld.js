@@ -292,6 +292,21 @@ EXPORTS['on-server-msg'] =
  **************************/
 
 
+var jsa = function(attribList) {
+	checkListOf(attribList, function(x) { return isList(x) && length(x) == 2; },
+		    'js-a', 'list of (list of X Y)', 1);
+	var attribs = assocListToHash(attribList);
+	var node = jsworld.MobyJsworld.a(attribs);
+	node.toWrittenString = function(cache) { return "(js-a)"; };
+	node.toDisplayedString = node.toWrittenString;
+	node.toDomNode = function(cache) { return node; };
+	return helpers.wrapJsValue(node);
+};
+EXPORTS['js-a'] =
+    new CasePrimitive('js-a',
+	[new PrimProc('js-a', 0, false, false, function() { return jsa(types.EMPTY); }),
+	 new PrimProc('js-a', 1, false, false, jsa)]);
+
 var jsp = function(attribList) {
 	checkListOf(attribList, function(x) { return isList(x) && length(x) == 2; },
 		    'js-p', 'list of (list of X Y)', 1);
@@ -306,7 +321,6 @@ EXPORTS['js-p'] =
     new CasePrimitive('js-p',
 	[new PrimProc('js-p', 0, false, false, function() { return jsp(types.EMPTY); }),
 	 new PrimProc('js-p', 1, false, false, jsp)]);
-
 
 var jsdiv = function(attribList) {
 	checkListOf(attribList, isAssocList, 'js-div', '(listof X Y)', 1);

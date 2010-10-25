@@ -17,6 +17,7 @@
 	 on-redraw on-draw
 	 initial-effect
 
+	 js-a
 	 js-p
 	 js-div
 	 js-button
