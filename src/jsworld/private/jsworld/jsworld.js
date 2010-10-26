@@ -181,7 +181,7 @@ var jsworld = {};
         xhr.onreadystatechange = mk_on_change(xhr, success, failure);
 	xhr.open("POST", type_to_url(name, msg_type), true);
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhr.send(JSON.stringify(helpers.unwrapSexp(msg)));
+	xhr.send("data=" + JSON.stringify(helpers.unwrapSexp(msg.rest())));
 
     }
 
