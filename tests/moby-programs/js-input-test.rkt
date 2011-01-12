@@ -5,7 +5,7 @@
 (define input
   (js-input "text"
             (lambda (w v) v)
-            '()))
+            '(("value" "foo"))))
 
 (define (draw w)
   (list (js-div)

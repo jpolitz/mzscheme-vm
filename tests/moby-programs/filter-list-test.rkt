@@ -15,8 +15,10 @@
     (lambda (applicant)
       (list (js-div)
             (list (js-text (applicant-name applicant)))
-            (list (js-text (number->string 
-                            (applicant-rating applicant)))))))))
+            (list (js-text (string-append
+                            "Rating: "
+                            (number->string 
+                             (applicant-rating applicant))))))))))
 
 (define a1 (make-applicant 0 "Bob" 5))
 (define a2 (make-applicant 1 "Frank" 5))

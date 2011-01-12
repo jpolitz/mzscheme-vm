@@ -9,7 +9,6 @@
   (define (mk-filter range)
     (lambda (item)
       (let ([val (range-lookup item)])
-;        (display (format "Comparing ~a to ~a" val range))
         (and (<= (car range) val) (>= (cdr range) val)))))
 
   (define (mk-input new-world)

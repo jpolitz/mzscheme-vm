@@ -5,9 +5,9 @@
 (require "tab-widget.rkt")
 (require "counter-widget.rkt")
 
-(define t1 (lambda () (make-counter)))
+(define t1 (make-counter))
 
-(define t2 (lambda () (make-counter)))
+(define t2 (make-counter 1000))
 
 (define tabs (list (list "tab1" t1) (list "tab2" t2)))
 
