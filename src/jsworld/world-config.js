@@ -58,6 +58,7 @@ var world = {};
             // Handle messages from other worlds, and messages from the server
             onMsg: false,
             onServerMsg: false,
+            onPageMsg: false,
 
 	    // onRedraw: world -> scene
 	    onRedraw: false,

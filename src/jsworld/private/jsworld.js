@@ -588,6 +588,9 @@
         if(e.val && e.val._fields) {
             console.log(e.val._fields[0]);
         }
+        else {
+            console.log(e);
+        }
 	world.stimuli.massShutdown();
 	shutdownUserConfigs(function() {
 		if (typeof(console) !== 'undefined' && console.log) {

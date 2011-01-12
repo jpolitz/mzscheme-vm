@@ -286,6 +286,22 @@ EXPORTS['on-server-msg'] =
                      }))();
                  });
 
+EXPORTS['on-page-msg'] =
+    new PrimProc('on-page-msg',
+                 1,
+                 false, false,
+                 function(onPageMsg) {
+                     check(onPageMsg, isFunction, 'on-page-msg', 'procedure');
+                     return new (WorldConfigOption.extend({
+                         init: function() {
+                             this._super("on-page-msg");
+                         },
+                         configure: function(config) {
+                             return config.updateAll({'onPageMsg': onPageMsg});
+                         }
+                     }))();
+                 });
+
 
 /**************************
  *** Jsworld Primitives ***
@@ -452,6 +468,10 @@ EXPORTS['js-select'] =
 var embed = function(worldHandler) {
     var top = worldHandler.toplevelNode,
         node = jsworld.MobyJsworld.div([]);
+
+    if(top) {
+        top.parentNode.removeChild(top);
+    }
 
     node.appendChild(top);
 
