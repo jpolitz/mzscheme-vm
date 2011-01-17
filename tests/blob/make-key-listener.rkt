@@ -22,8 +22,7 @@
                  (let ([m-listener (make-key-listener the-world 'm)]
                        [drawer (make-to-screen '() foo)])
                    (handler-complete w '() ;; no signals
-                                     `(,(register m-listener "on-key")
-                                       ,(register drawer "on-screen"))
+                                     `(,(register m-listener "on-key"))
                                      `(,(introduce m-listener)
                                        ,(introduce drawer))))))
         ('on-key (lambda (w m)
