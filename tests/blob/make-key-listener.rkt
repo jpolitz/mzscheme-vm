@@ -10,7 +10,6 @@
                                    `(,(register keysource "on-key")))))
         ('on-key (lambda (w thiskey)
                    (begin
-                     (display (format "Got key: ~a\n" thiskey))
                      (handler-complete '()
                                        (if (key=? key thiskey)
                                            `(,(signal "on-key" thiskey))
@@ -20,14 +19,12 @@
   (blob '_
         ('main (lambda (w the-world)
                  (let ([m-listener (make-key-listener the-world 'm)]
-                       [drawer (make-to-screen '() foo)])
-                   (handler-complete w '() ;; no signals
+                       [drawer (make-to-screen (GET-TOP-SCREEN) foo)])
+                   (handler-complete w '() ;; no signals yet
                                      `(,(register m-listener "on-key"))
                                      `(,(introduce m-listener)
                                        ,(introduce drawer))))))
         ('on-key (lambda (w m)
-                   (begin
-                     (display (format "Main got key: ~a\n" m))
-                     (handler-complete w `(,(signal "on-screen" "data"))))))))
+                     (handler-complete w `(,(signal 'on-screen (div `(,(format "Main got key: ~a\n" m))))))))))
 
 (primitive-send foo 'main (MAKE-THE-WORLD))
