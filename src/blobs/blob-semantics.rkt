@@ -2,7 +2,7 @@
 (require redex)
 
 (define-language λB
-  (p number string)
+  (p number string)  
   ;; blobs have a value, a list of pending signals, and a list of handlers
   (b (blob (v (p v ...) ...) (h ...) (l ...)))
   ;; handlers say that a blob respond to a signal p with the given function
@@ -10,13 +10,13 @@
   ;; listener registrations say that a blob listens to messages from another
   (l (p b))
   ;; blobs that don't have any pending signals are values
-  (v p (λ (x ...) e)
+  (v p (λ (x ...) e) prim-blob
      (blob (v) (h ...) (l ...))
      x)
   
   (e v b (e e ...))
   
-  ((x y f g) (variable-except λ blob))
+  ((x y f g) (variable-except λ blob prim-blob))
   
   (E hole
      ;; we can evaluate things in the value position of the blob
@@ -27,6 +27,14 @@
                         (p_2 E)
                         (p_3 (blob (v_3) (h_3 ...) (l_3 ...))) ...))
      (v ... E e ...)))
+
+(define-metafunction λB
+  queue-prim : p v ... any -> any
+  [(queue-prim p v ... (blob (prim-blob (p_1 v_1 ...) ...) () ()))
+   (blob (prim-blob (p_1 v_1 ...) ... (p v ...)) () ())]
+  [(queue-prim p v ... (any_2 ...))
+   ((queue-prim p v ... any_2) ...)]
+  [(queue-prim p v ... any_2) any_2])
 
 (define-metafunction λB
   subst-n : (x any) ... any -> any
@@ -102,7 +110,9 @@
                                      (l ...)))
                           
                           (p_6 b_3) ...)))
-        "Signal")))
+        "Signal")
+   (--> e (queue-prim "prim-signal" "prim-value" e)
+        "δ-Event")))
 
 (define simple-signal
   (term (blob (5) 
@@ -133,9 +143,16 @@
                             (("foo" (λ (w v) (v ("bar" v)))))
                             (("foo" (blob ("_" ("foo" 10)) () ())))))))))
 
+(define has-prim
+  (term (blob (15)
+              (("prim-signal" (λ (w v) (v))))
+              (("prim-signal" (blob (prim-blob) () ()))))))
+
 (redex-match λB (in-hole E b) simple-signal)
+(redex-match λB (in-hole E b) has-prim)
 
 (traces reduce simple-signal)
 (traces reduce once-nested)
 (traces reduce once-nested-two-signals)
 (traces reduce once-nested-two-blobs)
+(traces reduce has-prim)
